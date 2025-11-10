@@ -1,0 +1,43 @@
+{
+	"info": {
+		"_postman_id": "d2259190-921d-4020-97cc-6e1a0579e986",
+		"name": "WealthWise Portfolio Tracker",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43855271",
+		"_collection_link": "https://snow-6958251.postman.co/workspace/Snow-'s-Workspace~7d7a6d8e-2943-4fa2-8c1e-deb677115c22/collection/43855271-d2259190-921d-4020-97cc-6e1a0579e986?action=share&source=collection_link&creator=43855271"
+	},
+	"item": [
+		{
+			"name": "Creat New User",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Add transaction",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch all transactions for a User",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "View portfolio summary for a user",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
