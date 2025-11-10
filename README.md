@@ -114,18 +114,18 @@ current_price float Current market price
 
 Project Structure
 app/
-├── main.py
-├── database.py
-├── models/
-│ └── models.py
-├── routers/
-│ ├── user_router.py
-│ ├── transaction_router.py
-│ └── portfolio_router.py
-├── utils/
-│ ├── exceptions.py
-│ └── responses.py
-└── mock_prices.json
+-- main.py
+-- database.py
+-- models/
+   |--- models.py
+--routers/
+   |--- user_router.py
+   |--- transaction_router.py
+   |--- portfolio_router.py
+-- utils/
+   |--- exceptions.py
+   |--- responses.py
+-- mock_prices.json
 
 Testing
 
@@ -142,11 +142,47 @@ Using Postman
 A Postman collection (WealthWise.postman_collection.json) is included.
 Import it into Postman and test the endpoints in the following order:
 
-Create User
+Create User (POST)
+http://127.0.0.1:8000/users
 
-Add Transactions
 
-Fetch Portfolio Summary
+Add Transactions (POST)
+http://127.0.0.1:8000/transection
+
+<img width="345" height="212" alt="image" src="https://github.com/user-attachments/assets/0d452fd4-fb43-4e87-9bd5-162d1d219671" />
+
+
+Show All Transactions (GET) 
+(input: user_id)
+http://127.0.0.1:8000/transection/all
+
+<img width="352" height="419" alt="image" src="https://github.com/user-attachments/assets/249eb654-46e4-463e-81a0-13a3e70d392e" />
+
+
+
+Fetch Portfolio Summary (GET)
+/portfolio-summary?user_id=1
+
+(Prices table)
+<img width="479" height="524" alt="image" src="https://github.com/user-attachments/assets/a226437d-5257-4b7d-8087-fb0113ffd9e7" />
+
+(Summary)
+<img width="481" height="482" alt="image" src="https://github.com/user-attachments/assets/dffa5da1-e5d3-4e82-a54a-42b1086052f5" />
+
+AFTER UPDATE QUERY 
+UPDATE prices SET current_price = 3600 WHERE symbol = 'TCS';
+UPDATE prices SET current_price = 1580 WHERE symbol = 'INFY';
+
+After
+(Prices table)
+<img width="507" height="546" alt="image" src="https://github.com/user-attachments/assets/50e799aa-d5e0-4d2a-9e7c-35628b80bd48" />
+
+(Summary)
+<img width="507" height="546" alt="image" src="https://github.com/user-attachments/assets/001dcafd-51e5-4346-8768-88ba537fdaf9" />
+
+
+
+
 
 Author
 
