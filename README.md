@@ -110,6 +110,8 @@ prices
 Field Type Description
 symbol varchar(50) (PK) Stock symbol
 current_price float Current market price
+
+
 Project Structure
 app/
 ├── main.py
