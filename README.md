@@ -1,133 +1,189 @@
-WealthWise Portfolio Tracker API
 
-Author: Saish Ghadi
-Tech Stack: FastAPI · PostgreSQL · SQLAlchemy
-Project Type: Backend API Assignment
+---
 
-Overview
+# WealthWise Portfolio Tracker API
 
-WealthWise Portfolio Tracker is a backend service designed to manage user investment portfolios.
-It allows users to record stock transactions (buy/sell), view their current holdings, and calculate profit or loss based on real-time or mock market prices.
+**Author:** Saish Ghadi
+**Tech Stack:** FastAPI · PostgreSQL · SQLAlchemy
+**Project Type:** Backend API Assignment
 
-This project demonstrates backend API development, database design, and portfolio computation logic using modern Python frameworks.
+---
 
-Features
+##  Overview
 
-User registration and management
+**WealthWise Portfolio Tracker** is a backend API service designed to manage user investment portfolios.
+It allows users to record **stock transactions (buy/sell)**, view their **current holdings**, and calculate **profit or loss** based on real-time or mock market prices.
 
-Record buy/sell transactions for stocks
+This project demonstrates **backend API development**, **database modeling**, and **portfolio computation logic** using modern Python frameworks.
 
-Fetch real-time or mock prices from the database
+---
 
-Portfolio summary calculation with total value and unrealized profit/loss
+##  Features
 
-Consistent API response structure
+* User registration and authentication
+* Record **buy/sell** stock transactions
+* Fetch **real-time or mock** stock prices
+* Generate **portfolio summary** with total value and profit/loss
+* Consistent JSON API responses
+* Clean, modular architecture using **routers**, **schemas**, and **utility helpers**
 
-Modular architecture using routers and utility helpers
+---
 
-Setup Instructions
+##  Setup Instructions
 
-1. Clone the Repository
-   git clone <your_repo_url>
-   cd wealthwise-portfolio-tracker
+### 1. Clone the Repository
 
-2. Create Virtual Environment
-   python -m venv venv
-   venv\Scripts\activate # On Windows
-   source venv/bin/activate # On macOS/Linux
+```bash
+git clone https://github.com/SaishGhadi/wealthwise-portfolio-tracker.git
+cd wealthwise-portfolio-tracker
+```
 
-3. Install Dependencies
-   pip install -r requirements.txt
+### 2. Create Virtual Environment
 
-4. Setup Database
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+```
 
-Create a PostgreSQL database named wealthwise_db:
+### 3. Install Dependencies
 
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Setup PostgreSQL Database
+
+Create a database named **wealthwise_db**:
+
+```sql
 CREATE DATABASE wealthwise_db;
+```
 
-5. Configure Environment
+### 5. Configure Environment Variables
 
-Create a .env file in the project root:
+Create a `.env` file in the project root (Make sure to include the password used in pgAdmin):
 
+```
 DATABASE_URL=postgresql://postgres:<password>@localhost/wealthwise_db
+```
 
-6. Run the Server
-   uvicorn app.main:app --reload
+>  If your password includes special characters (like `@` or `#`), use URL encoding (e.g., `@` → `%40`, `#` → `%23`).
 
-The API will be available at
-http://127.0.0.1:8000
+### 6. Run the Server
 
-Open the interactive documentation at
-http://127.0.0.1:8000/docs
+```bash
+uvicorn app.main:app --reload
+```
 
-API Endpoints
-Method Endpoint Description
-POST /user Create a new user
-GET /transaction/all?user_id=<id> Fetch all transactions for a user
-POST /transaction Add a buy/sell transaction
-GET /portfolio-summary?user_id=<id> Get portfolio summary for a user
-Example Response
+Server will run at:
+ [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-GET /portfolio-summary?user_id=1
+Swagger UI (API Docs):
+ [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
+---
+
+##  API Endpoints
+
+| Method   | Endpoint                          | Description                       |
+| -------- | --------------------------------- | --------------------------------- |
+| **POST** | `/user`                           | Create a new user                 |
+| **POST** | `/transaction`                    | Add a buy/sell transaction        |
+| **GET**  | `/transaction/all?user_id=<id>`   | Fetch all transactions for a user |
+| **GET**  | `/portfolio-summary?user_id=<id>` | Get portfolio summary for a user  |
+
+---
+
+##  Example Response
+
+### **GET /portfolio-summary?user_id=1**
+
+```json
 {
-"status": "success",
-"data": {
-"user_id": 1,
-"holdings": [
-{
-"symbol": "TCS",
-"units": 12,
-"avg_cost": 3400,
-"current_price": 3600,
-"unrealized_pl": 2400
+  "status": "success",
+  "data": {
+    "user_id": 1,
+    "holdings": [
+      {
+        "symbol": "TCS",
+        "units": 12,
+        "avg_cost": 3400,
+        "current_price": 3600,
+        "unrealized_pl": 2400
+      }
+    ],
+    "total_value": 43200,
+    "total_gain": 2400
+  },
+  "message": "Portfolio summary fetched successfully"
 }
-],
-"total_value": 43200,
-"total_gain": 2400
-},
-"message": "Portfolio summary fetched successfully"
-}
+```
 
-Database Schema
-users
-Field Type Description
-id int (PK) Unique user ID
-name varchar(100) User’s name
-email varchar(100) Unique email
-password varchar(255) Hashed password
-created_at timestamp Account creation time
-transactions
-Field Type Description
-id int (PK) Transaction ID
-user_id int (FK) Linked user
-symbol varchar(50) Stock symbol
-type varchar(10) BUY or SELL
-units float Quantity
-price float Price per unit
-date date Transaction date
-prices
-Field Type Description
-symbol varchar(50) (PK) Stock symbol
-current_price float Current market price
+---
 
+##  Database Schema
 
-Project Structure
+### **users**
+
+| Field      | Type         | Description           |
+| ---------- | ------------ | --------------------- |
+| id         | int (PK)     | Unique user ID        |
+| name       | varchar(100) | User’s name           |
+| email      | varchar(100) | Unique email          |
+| password   | varchar(255) | Hashed password       |
+| created_at | timestamp    | Account creation time |
+
+### **transactions**
+
+| Field   | Type        | Description      |
+| ------- | ----------- | ---------------- |
+| id      | int (PK)    | Transaction ID   |
+| user_id | int (FK)    | Linked user      |
+| symbol  | varchar(50) | Stock symbol     |
+| type    | varchar(10) | BUY or SELL      |
+| units   | float       | Quantity         |
+| price   | float       | Price per unit   |
+| date    | date        | Transaction date |
+
+### **prices**
+
+| Field         | Type             | Description          |
+| ------------- | ---------------- | -------------------- |
+| symbol        | varchar(50) (PK) | Stock symbol         |
+| current_price | float            | Current market price |
+
+---
+
+##  Project Structure
+
+```
 app/
--- main.py
--- database.py
--- models/
-   |--- models.py
---routers/
-   |--- user_router.py
-   |--- transaction_router.py
-   |--- portfolio_router.py
--- utils/
-   |--- exceptions.py
-   |--- responses.py
--- mock_prices.json
+│
+├── main.py
+├── database.py
+│
+├── models/
+│   └── models.py
+│
+├── routers/
+│   ├── user_router.py
+│   ├── transaction_router.py
+│   └── portfolio_router.py
+│
+├── schemas/
+│   └── schemas.py
+│
+├── utils/
+│   ├── exceptions.py
+│   └── responses.py
+│
+└── mock_prices.json
+```
 
-Testing
+---
+
+##  Testing
 
 You can test all API routes directly using FastAPI's built-in Swagger UI or Postman.
 
@@ -137,55 +193,80 @@ Visit:
 
 http://127.0.0.1:8000/docs
 
-Using Postman
 
-A Postman collection (WealthWise.postman_collection.json) is included.
+### **Using Postman**
+
+A Postman collection (`WealthWise.postman_collection.json`) is included.
 Import it into Postman and test the endpoints in the following order:
 
-Create User (POST)
+---
+
+#### **1️ Create User (POST)**
+
+```
 http://127.0.0.1:8000/users
+```
 
+---
 
-Add Transactions (POST)
+#### **2️ Add Transaction (POST)**
+
+```
 http://127.0.0.1:8000/transection
+```
 
-<img width="345" height="212" alt="image" src="https://github.com/user-attachments/assets/0d452fd4-fb43-4e87-9bd5-162d1d219671" />
+![Add Transaction Screenshot](https://github.com/user-attachments/assets/0d452fd4-fb43-4e87-9bd5-162d1d219671)
 
+---
 
-Show All Transactions (GET) 
-(input: user_id)
-http://127.0.0.1:8000/transection/all
+#### **3️ Show All Transactions (GET)**
 
-<img width="352" height="419" alt="image" src="https://github.com/user-attachments/assets/249eb654-46e4-463e-81a0-13a3e70d392e" />
+```
+http://127.0.0.1:8000/transection/all?user_id=1
+```
 
+![All Transactions Screenshot](https://github.com/user-attachments/assets/249eb654-46e4-463e-81a0-13a3e70d392e)
 
+---
 
-Fetch Portfolio Summary (GET)
+#### **4️ Fetch Portfolio Summary (GET)**
+
+```
 /portfolio-summary?user_id=1
+```
 
-(Prices table)
-<img width="479" height="524" alt="image" src="https://github.com/user-attachments/assets/a226437d-5257-4b7d-8087-fb0113ffd9e7" />
+**(Prices Table)**
+###
+![Prices Table Screenshot](https://github.com/user-attachments/assets/a226437d-5257-4b7d-8087-fb0113ffd9e7)
 
-(Summary)
-<img width="481" height="482" alt="image" src="https://github.com/user-attachments/assets/dffa5da1-e5d3-4e82-a54a-42b1086052f5" />
+**(Summary)**
+###
+![Portfolio Summary Screenshot](https://github.com/user-attachments/assets/dffa5da1-e5d3-4e82-a54a-42b1086052f5)
 
-AFTER UPDATE QUERY 
+---
+
+### **After Updating Prices**
+
+```sql
 UPDATE prices SET current_price = 3600 WHERE symbol = 'TCS';
 UPDATE prices SET current_price = 1580 WHERE symbol = 'INFY';
+```
 
-After
-(Prices table)
-<img width="507" height="546" alt="image" src="https://github.com/user-attachments/assets/50e799aa-d5e0-4d2a-9e7c-35628b80bd48" />
+**(Updated Prices Table)**
 
-(Summary)
-<img width="507" height="546" alt="image" src="https://github.com/user-attachments/assets/001dcafd-51e5-4346-8768-88ba537fdaf9" />
+![Updated Prices Screenshot](https://github.com/user-attachments/assets/50e799aa-d5e0-4d2a-9e7c-35628b80bd48)
 
+**(Updated Summary)**
 
-
+![Updated Summary Screenshot](https://github.com/user-attachments/assets/001dcafd-51e5-4346-8768-88ba537fdaf9)
 
 
-Author
+---
 
-Saish Ghadi
-Bachelor of Engineering in Information Technology
-Goa Engineering College
+##  Author
+
+**Saish Ghadi**
+
+---
+
+
