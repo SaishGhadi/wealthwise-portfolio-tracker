@@ -263,6 +263,153 @@ UPDATE prices SET current_price = 1580 WHERE symbol = 'INFY';
 
 ---
 
+##  JWT Authentication & Secure Access
+
+The WealthWise API now includes secure user authentication using **JWT (JSON Web Tokens)** and **bcrypt password hashing**.
+
+### **Features Implemented**
+
+* User registration with **hashed password storage** (bcrypt).
+* **Login endpoint** (`POST /user/login`) that verifies user credentials and returns a JWT token.
+* **Protected routes** (`/transaction`, `/portfolio-summary`) accessible only with a valid token.
+* Automatic **token-based user identification** — no need to manually pass `user_id` in requests.
+* **CORS-enabled backend** for frontend or Postman integration.
+
+---
+
+### **Password Security**
+
+* Passwords are hashed using `bcrypt` with automatic salt generation.
+* Plain-text passwords are never stored in the database.
+
+Example of a stored bcrypt hash:
+
+```
+$2b$12$ZRhV7v3sKsfmReXgc.xZB.8Xy3u8sbjLOixD4zM0.Y.IkEE4clAO6
+```
+
+---
+
+### **Login & Token Generation**
+
+**Endpoint:**
+
+```
+POST /user/login
+```
+
+**Request (form data):**
+
+```
+username: saish@example.com
+password: test123
+```
+
+**Response:**
+
+```json
+{
+  "status": "success",
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "token_type": "bearer"
+  },
+  "message": "Login successful"
+}
+```
+
+---
+
+### **Authentication Flow**
+
+1. **Register** a new user via `POST /user`
+
+   ```json
+   {
+     "name": "Saish Ghadi",
+     "email": "saish@example.com",
+     "password": "test123"
+   }
+   ```
+
+2. **Login** via `POST /user/login` to get a JWT token.
+
+3. Copy the `access_token` and **authorize** in Swagger UI (top-right “Authorize” button):
+
+   ```
+   Bearer <your_token_here>
+   ```
+
+4. Now all protected endpoints (like `/transaction/all` or `/portfolio-summary`) will work using that token.
+
+---
+
+### **Protected Routes Example**
+
+**Headers required:**
+
+```
+Authorization: Bearer <your_token_here>
+```
+
+**Example call:**
+
+```
+GET /transaction/all
+```
+
+**Response:**
+
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,
+      "symbol": "TCS",
+      "type": "BUY",
+      "units": 5,
+      "price": 3400,
+      "date": "2025-11-08"
+    }
+  ],
+  "message": "Transactions retrieved successfully"
+}
+```
+
+---
+
+### **Security Highlights**
+
+* JWT tokens include expiry (`exp` claim).
+* Tokens are signed using HS256 algorithm and `SECRET_KEY`.
+* Invalid or expired tokens return a `401 Unauthorized` response.
+* All password operations use bcrypt-safe comparison (`bcrypt.checkpw`).
+* 
+---
+
+### **What i Added in This Stage**
+
+| Feature                       | Description                                                       |
+| ----------------------------- | ----------------------------------------------------------------- |
+| **bcrypt Hashing**            | Passwords securely stored with salt-based hashes.                 |
+| **JWT Login Endpoint**        | `/user/login` implemented for authentication.                     |
+| **Token Generation & Expiry** | JWT created with expiry and user_id payload.                      |
+| **Protected Routes**          | `/transaction` and `/portfolio-summary` now require valid tokens. |
+| **Auto User Resolution**      | Authenticated user automatically identified in every request.     |
+| **Swagger Authorization**     | Integrated “Authorize” flow to test protected endpoints easily.   |
+
+---
+
+
+
+
+
+
+
+
+---
+
 ##  Author
 
 **Saish Ghadi**
