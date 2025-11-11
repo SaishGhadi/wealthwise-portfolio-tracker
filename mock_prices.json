@@ -1,7 +1,7 @@
-{
-  "TCS": 3400,
-  "INFY": 1520,
-  "RELIANCE": 2625,
-  "HDFCBANK": 1750,
-  "WIPRO": 430
-}
+[
+  { "symbol": "TCS", "current_price": 2485.75 },
+  { "symbol": "INFY", "current_price": 1528.40 },
+  { "symbol": "RELIANCE", "current_price": 2520.30 },
+  { "symbol": "HDFC", "current_price": 1225.50 },
+  { "symbol": "SBIN", "current_price": 760.20 }
+]

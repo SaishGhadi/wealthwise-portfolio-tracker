@@ -13,7 +13,7 @@ class TransactionType(str, Enum):
 class UserCreate(BaseModel):
     name: str
     email: EmailStr
-    password: str   
+    password: str
 
 
 class UserResponse(BaseModel):
@@ -25,20 +25,23 @@ class UserResponse(BaseModel):
     class Config:
         orm_mode = True
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 
 class TokenData(BaseModel):
     user_id: Optional[int] = None
 
 # Schema for Creating New TRANSACTION
+
+
 class TransactionCreate(BaseModel):
-    user_id: int
+    # user_id: int
     symbol: str
     type: TransactionType
     units: float
-    price: float
     date: date
 
 

@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List
+from datetime import date
 from app.database import get_db
-from app.models.models import Transaction, TransactionType
+from app.models.models import Transaction, TransactionType, Price
 from app.schemas.schemas import TransactionCreate
 from app.utils.responses import success_response, error_response
 from app.utils.exceptions import bad_request, not_found
@@ -13,11 +14,21 @@ router = APIRouter(prefix="/transaction", tags=["Transactions"])
 
 
 @router.post("/", response_model=None)
-def add_transaction(txn: TransactionCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Use the authenticated user's id, ignore txn.user_id if provided
+def add_transaction(
+    txn: TransactionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     user_id = current_user.id
 
-    # SELL validation
+    # 1️⃣ Get current price for the symbol
+    price_obj = db.query(Price).filter(Price.symbol == txn.symbol).first()
+    if not price_obj:
+        return not_found(f"No current price found for symbol '{txn.symbol}'")
+
+    current_price = price_obj.current_price
+
+    # 2️⃣ SELL validation — ensure user owns enough units
     if txn.type == TransactionType.SELL:
         total_buys = db.query(Transaction).filter(
             Transaction.user_id == user_id,
@@ -35,14 +46,16 @@ def add_transaction(txn: TransactionCreate, db: Session = Depends(get_db), curre
         if txn.units > owned_units:
             return bad_request("Not enough units to sell")
 
+    # 3️⃣ Create new transaction with current price
     new_txn = Transaction(
         user_id=user_id,
         symbol=txn.symbol,
         type=txn.type,
         units=txn.units,
-        price=txn.price,
-        date=txn.date
+        price=current_price,   # Auto-fetched
+        date=txn.date or date.today()
     )
+
     db.add(new_txn)
     db.commit()
     db.refresh(new_txn)
@@ -56,13 +69,18 @@ def add_transaction(txn: TransactionCreate, db: Session = Depends(get_db), curre
         "price": new_txn.price,
         "date": str(new_txn.date)
     }
+
     return success_response(data=data, message="Transaction added successfully")
 
 
 @router.get("/all", response_model=None)
-def get_transactions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_transactions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     user_id = current_user.id
     txns = db.query(Transaction).filter(Transaction.user_id == user_id).all()
+
     if not txns:
         return error_response(message="No transactions found for this user", status_code=404)
 
@@ -77,4 +95,5 @@ def get_transactions(db: Session = Depends(get_db), current_user: User = Depends
         }
         for t in txns
     ]
+
     return success_response(data=txn_list, message="Transactions retrieved successfully")

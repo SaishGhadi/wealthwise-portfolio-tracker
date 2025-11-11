@@ -9,3 +9,4 @@ passlib[bcrypt]
 PyJWT
 python-multipart
 bcrypt
+apscheduler
