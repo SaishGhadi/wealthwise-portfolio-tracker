@@ -4,12 +4,14 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.models import User, Transaction, Price, TransactionType
+from app.utils.deps import get_current_user
 
 router = APIRouter(prefix="/portfolio-summary", tags=["Portfolio Summary"])
 
 
 @router.get("/")
-def get_portfolio_summary(user_id: int = Query(...), db: Session = Depends(get_db)):
+def get_portfolio_summary(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    user_id = current_user.id
     #  Check if user exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:

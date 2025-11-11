@@ -1,44 +1,42 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models.models import Transaction, User, TransactionType
-from app.schemas.schemas import TransactionCreate, TransactionResponse
 from typing import List
+from app.database import get_db
+from app.models.models import Transaction, TransactionType
+from app.schemas.schemas import TransactionCreate
 from app.utils.responses import success_response, error_response
-from app.utils.exceptions import bad_request
+from app.utils.exceptions import bad_request, not_found
+from app.utils.deps import get_current_user
+from app.models.models import User
 
 router = APIRouter(prefix="/transaction", tags=["Transactions"])
 
 
-# ===== Add Transaction =====
-@router.post("/", response_model=TransactionResponse)
-def add_transaction(txn: TransactionCreate, db: Session = Depends(get_db)):
+@router.post("/", response_model=None)
+def add_transaction(txn: TransactionCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Use the authenticated user's id, ignore txn.user_id if provided
+    user_id = current_user.id
 
-    user = db.query(User).filter(User.id == txn.user_id).first()
-    if not user:
-        bad_request("User not found")
-
-    # SELL validation  ensure user owns enough units
+    # SELL validation
     if txn.type == TransactionType.SELL:
         total_buys = db.query(Transaction).filter(
-            Transaction.user_id == txn.user_id,
+            Transaction.user_id == user_id,
             Transaction.symbol == txn.symbol,
             Transaction.type == TransactionType.BUY
         ).all()
 
         total_sells = db.query(Transaction).filter(
-            Transaction.user_id == txn.user_id,
+            Transaction.user_id == user_id,
             Transaction.symbol == txn.symbol,
             Transaction.type == TransactionType.SELL
         ).all()
 
-        owned_units = sum(t.units for t in total_buys) - \
-            sum(t.units for t in total_sells)
+        owned_units = sum(t.units for t in total_buys) - sum(t.units for t in total_sells)
         if txn.units > owned_units:
-            bad_request("Not enough units to sell")
+            return bad_request("Not enough units to sell")
 
     new_txn = Transaction(
-        user_id=txn.user_id,
+        user_id=user_id,
         symbol=txn.symbol,
         type=txn.type,
         units=txn.units,
@@ -48,13 +46,35 @@ def add_transaction(txn: TransactionCreate, db: Session = Depends(get_db)):
     db.add(new_txn)
     db.commit()
     db.refresh(new_txn)
-    return success_response(message="Transaction added successfully")
+
+    data = {
+        "id": new_txn.id,
+        "user_id": new_txn.user_id,
+        "symbol": new_txn.symbol,
+        "type": new_txn.type,
+        "units": new_txn.units,
+        "price": new_txn.price,
+        "date": str(new_txn.date)
+    }
+    return success_response(data=data, message="Transaction added successfully")
 
 
-#  Get Transaction History
-@router.get("/all", response_model=List[TransactionResponse])
-def get_transactions(user_id: int = Query(...), db: Session = Depends(get_db)):
+@router.get("/all", response_model=None)
+def get_transactions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    user_id = current_user.id
     txns = db.query(Transaction).filter(Transaction.user_id == user_id).all()
     if not txns:
-        bad_request("No transactions found for this user")
-    return txns
+        return error_response(message="No transactions found for this user", status_code=404)
+
+    txn_list = [
+        {
+            "id": t.id,
+            "symbol": t.symbol,
+            "type": t.type,
+            "units": t.units,
+            "price": t.price,
+            "date": str(t.date)
+        }
+        for t in txns
+    ]
+    return success_response(data=txn_list, message="Transactions retrieved successfully")

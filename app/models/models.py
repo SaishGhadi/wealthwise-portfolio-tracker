@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, DateTime, Enum
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, DateTime, Enum, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
@@ -17,13 +17,14 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
+    password = Column(String(255), nullable=True)   # new column (hashed) added for jwt authententication 
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationship to transactions
     transactions = relationship("Transaction", back_populates="user")
 
 
-# Transaction Model
+# Transaction Model 
 class Transaction(Base):
     __tablename__ = "transactions"
 
@@ -39,9 +40,11 @@ class Transaction(Base):
     user = relationship("User", back_populates="transactions")
 
 
-# Prices Model
+# Prices Model 
 class Price(Base):
     __tablename__ = "prices"
 
     symbol = Column(String, primary_key=True)
     current_price = Column(Float, nullable=False)
+
+

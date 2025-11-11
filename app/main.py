@@ -1,31 +1,46 @@
-from fastapi import Request
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from fastapi import FastAPI
 from app.database import Base, engine
 from app.models import models
-from app.routers import user_router, transaction_router, prices
-from app.routers import portfolio_router
+from app.routers import user_router, transaction_router, prices, portfolio_router
+from fastapi.middleware.cors import CORSMiddleware
+
+# WealthWise Portfolio Tracker API - Main Entry Point
+
+app = FastAPI(title="WealthWise Portfolio Tracker API", version="1.0.0")
 
 
-app = FastAPI(title="WealthWise Portfolio Tracker API")
+# Allow CORS (Optional - for frontend or Postman)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or ["http://localhost:3000"] if using a frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-# Creates all tables
+# Database Initialization
+
 Base.metadata.create_all(bind=engine)
 
-#   root
+
+# Root Route
+
 @app.get("/")
 def root():
-    return {"message": "WealthWise Portfolio Tracker API is running "}
+    return {"message": "WealthWise Portfolio Tracker API is running"}
 
 
-# Includes routers
+# Routers
+
 app.include_router(user_router.router)
+app.include_router(transaction_router.router)
 app.include_router(portfolio_router.router)
 app.include_router(prices.router)
-app.include_router(transaction_router.router)
 
-
+# Global Exception Middleware
 @app.middleware("http")
 async def catch_exceptions(request: Request, call_next):
     try:
