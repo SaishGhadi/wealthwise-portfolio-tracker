@@ -4,8 +4,10 @@
 # WealthWise Portfolio Tracker API
 
 **Author:** Saish Ghadi
+
 **Tech Stack:** FastAPI · PostgreSQL · SQLAlchemy
-**Project Type:** Backend API Assignment
+
+**Project Type:** Backend API 
 
 ---
 
@@ -84,14 +86,36 @@ Swagger UI (API Docs):
 
 ---
 
-##  API Endpoints
+## 🔗 API Endpoints
 
-| Method   | Endpoint                          | Description                       |
-| -------- | --------------------------------- | --------------------------------- |
-| **POST** | `/user`                           | Create a new user                 |
-| **POST** | `/transaction`                    | Add a buy/sell transaction        |
-| **GET**  | `/transaction/all?user_id=<id>`   | Fetch all transactions for a user |
-| **GET**  | `/portfolio-summary?user_id=<id>` | Get portfolio summary for a user  |
+| Method   | Endpoint              | Description                                                                                                                                                               | Auth Required |
+| -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| **POST** | `/user`               | Register a new user with name, email, and password. Passwords are securely hashed using bcrypt.                                                                           | NO             |
+| **POST** | `/user/login`         | Authenticate user and return a JWT token for further requests.                                                                                                            | NO             |
+| **GET**  | `/user`               | Fetch all registered users.                                                                                                                                               | NO             |
+| **POST** | `/transaction`        | Add a new **BUY/SELL** transaction for the logged-in user. The system automatically fetches the current price from the `prices` table (users don’t enter price manually). | YES            |
+| **GET**  | `/transaction/all`    | Fetch all transactions for the logged-in user.                                                                                                                            | YES            |
+| **GET**  | `/portfolio-summary`  | Calculate and return the user’s holdings, total portfolio value, and unrealized profit/loss based on current prices.                                                      | YES            |
+| **GET**  | `/prices`             | Fetch the current prices for all symbols in the system.                                                                                                                   | NO             |
+| **POST** | `/prices/update-mock` | Manually trigger the price update from `mock_prices.json` file (useful for testing the background job).                                                                   | NO             |
+| **GET**  | `/`                   | Root route — confirms that the WealthWise API is running.                                                                                                                 | NO             |
+
+---
+
+### 🔒 Authentication Notes
+
+* All endpoints marked ✅ require a valid JWT token.
+* To authenticate:
+
+  1. Call `/user/login` to get your token.
+  2. In Swagger UI, click **Authorize** and paste **only the token (not “Bearer”)**.
+  3. Swagger will automatically send your token for all secure requests.
+
+---
+
+##  Final API Endpoints
+##
+<img width="1331" height="731" alt="image" src="https://github.com/user-attachments/assets/2e1ddf02-c998-4383-ad90-a5d440261ede" />
 
 ---
 
@@ -160,25 +184,30 @@ Swagger UI (API Docs):
 ```
 app/
 │
-├── main.py
-├── database.py
+├── main.py                          # Entry point of the FastAPI app
+├── database.py                      # SQLAlchemy DB engine and session
 │
 ├── models/
-│   └── models.py
+│   └── models.py                    # User, Transaction, and Price models
 │
 ├── routers/
-│   ├── user_router.py
-│   ├── transaction_router.py
-│   └── portfolio_router.py
+│   ├── user_router.py               # Handles user registration and login
+│   ├── transaction_router.py        # Buy/Sell transactions (JWT-protected)
+│   ├── portfolio_router.py          # Portfolio value and profit/loss endpoints
+│   └── prices.py                    # Price listing and mock price update API
 │
 ├── schemas/
-│   └── schemas.py
+│   └── schemas.py                   # Pydantic request/response schemas
 │
 ├── utils/
-│   ├── exceptions.py
-│   └── responses.py
+│   ├── auth.py                      # Password hashing + JWT creation/verification
+│   ├── deps.py                      # Token validation dependency (get_current_user)
+│   ├── exceptions.py                # Custom reusable HTTP error handlers
+│   └── responses.py                 # Unified API response format
 │
-└── mock_prices.json
+├── mock_prices.json                 # Mock price data for initial load or testing
+│
+└── requirements.txt                 # Project dependencies
 ```
 
 ---
@@ -334,13 +363,27 @@ password: test123
 
 2. **Login** via `POST /user/login` to get a JWT token.
 
-3. Copy the `access_token` and **authorize** in Swagger UI (top-right “Authorize” button):
+```json
+{
+  "status": "success",
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJleHAiOjE3NjI4NzE0MjR9.QqMi18O1jaAYeCVl9rnarnw2ceOjYM3H5zdgk-lHQAo",
+    "token_type": "bearer"
+  },
+  "message": "Login successful"
+}
+```
+   
 
-   ```
-   Bearer <your_token_here>
-   ```
+4. Copy the `access_token` and **authorize** in Swagger UI (top-right “Authorize” button):
 
-4. Now all protected endpoints (like `/transaction/all` or `/portfolio-summary`) will work using that token.
+
+   ###
+   <img width="583" height="240" alt="image" src="https://github.com/user-attachments/assets/cde01e3c-d33f-4514-8fcf-310261ec7e8e" />
+
+   
+
+5. Now all protected endpoints (like `/transaction/all` or `/portfolio-summary`) will work using that token.
 
 ---
 
@@ -401,10 +444,23 @@ GET /transaction/all
 
 ---
 
+##  Background Price Auto-Update Feature
 
+To make the portfolio more realistic, the API includes an automated price refresh mechanism that periodically updates asset prices in the database.
 
+### How it works:
 
+* The feature is implemented using **APScheduler** (Advanced Python Scheduler).
+* Every 2 minutes (can change in code), a background job runs the `update_prices()` function.
+* This function fetches all entries from the `prices` table and simulates live market behavior by slightly fluctuating each stock’s price (±5%).
+* The change is small and random to resemble real-time market volatility.
+* The updated prices are saved to the database, so users always see near-live mock values when fetching prices or calculating portfolio value.
 
+### Why it’s useful:
+
+* Helps simulate a **dynamic market environment** without relying on real APIs.
+* Ensures the portfolio and transaction calculations use changing data.
+* Keeps your project realistic and suitable for **demo or testing purposes**.
 
 
 
