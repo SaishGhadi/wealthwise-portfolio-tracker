@@ -178,6 +178,26 @@ Swagger UI (API Docs):
 | current_price | float            | Current market price |
 
 ---
+Perfect — adding a **DFD (Data Flow Diagram)** section to your README will make your backend project documentation look much more professional.
+
+Here’s the section you can **copy-paste directly** into your `README.md`:
+
+---
+
+##  Data Flow Diagram (DFD)
+
+The following diagram represents the logical flow of data within the **WealthWise Portfolio Tracker** backend.
+It shows how user actions interact with various API endpoints, how data moves between routes and the database, and how background processes keep information updated.
+
+There isn’t much visual to show in a backend project — it’s all about how data flows, interacts, and stays consistent behind the scenes, which is exactly what this DFD highlights.
+
+##
+<img width="3569" height="1581" alt="WN dfd-2025-11-12-151346" src="https://github.com/user-attachments/assets/a84a5258-ab2c-45c6-a2ef-5b7ea87ae081" />
+
+
+
+
+---
 
 ##  Project Structure
 
