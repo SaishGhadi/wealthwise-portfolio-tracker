@@ -178,11 +178,6 @@ Swagger UI (API Docs):
 | current_price | float            | Current market price |
 
 ---
-Perfect — adding a **DFD (Data Flow Diagram)** section to your README will make your backend project documentation look much more professional.
-
-Here’s the section you can **copy-paste directly** into your `README.md`:
-
----
 
 ##  Data Flow Diagram (DFD)
 
